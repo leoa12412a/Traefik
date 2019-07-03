@@ -68,10 +68,6 @@ CONTAINER ID        IMAGE                      COMMAND                  CREATED 
 Creating traefik_whoami_1 ... done
 ```
 
-```
-gitlab-rake gitlab:backup:create
-```
-
 下面我們使用上述反向代理的方式把server上10080port(gitlab)只到domain name
 
 一樣我們先撰寫gitlab的docker-compose.yml，主要是安裝redis,postgres還有gitlab，如下:
@@ -243,6 +239,53 @@ services:
  ![image](https://github.com/leoa12412a/Traefik/blob/master/1.PNG)
 
  ## Gitlab的備份與還原，從實際gitlab備份到docker建立的gitlab
- 
- 
- 
+還原gitlab需兩個gitlab版本一致
+首先使用指令備份gitlab
+```
+gitlab-rake gitlab:backup:create
+```
+備份出來的資料會在/var/opt/gitlab/backups裡面，會是一個.tar的壓縮檔
+上面gitlab的yml裡面的 /srv/docker/gitlab/gitlab:/home/git/data:Z 我們可以知道本機的/srv/docker/gitlab/gitlab和container內的/home/git/data是雙向的，所以我們把備份出來的資料放到/srv/docker/gitlab/gitlab
+```
+mv <YOURFILENAME>.tar /srv/docker/gitlab/gitlab
+```
+如果是不同機器也可以使用scp傳送
+```
+scp <YOURFILENAME>.tar root@XXX.XXX.XXX.XXX:/srv/docker/gitlab/gitlab
+```
+移動完成後，查看gitlab container的id 或是 name
+```
+[root@122-147-213-61 ~]# docker ps -a
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS                 PORTS                                                   NAMES
+94f5b4f8e391        gitlab/gitlab-ce    "/assets/wrapper"        5 hours ago         Up 5 hours (healthy)   443/tcp, 0.0.0.0:10022->22/tcp, 0.0.0.0:10080->80/tcp   dockercompose_gitlab_1
+0cd070261663        postgres            "docker-entrypoint.s潀"   5 hours ago         Up 5 hours             5432/tcp                                                dockercompose_postgresql_1
+8ac129bdaf50        redis               "docker-entrypoint.s潀"   5 hours ago         Up 5 hours             6379/tcp                                                dockercompose_redis_1
+2ad8df6c9088        traefik             "/traefik --api --do潀"   5 hours ago         Up 5 hours             0.0.0.0:80->80/tcp, 0.0.0.0:8080->8080/tcp              dockercompose_reverse-proxy_1
+```
+使用指令進入container
+```
+docker exec -it 94f5b4f8e391 bash
+```
+進入後把/home/git/data下的tar檔移動到gitlab預設backups下(/var/opt/gitlab/backups)
+
+斷開 gitlab 與資料庫的連接
+```
+gitlab-ctl stop unicorn
+gitlab-ctl stop sidekiq
+```
+查看狀態
+```
+gitlab-ctl status
+```
+還原備份以及重新建立資料庫
+```
+gitlab-rake gitlab:backup:restore BACKUP=1493107454_2017_04_25_9.1.0
+```
+重新啟動gitlab
+```
+gitlab-ctl restart
+gitlab-rake gitlab:check SANITIZE=true
+```
+![image](https://github.com/leoa12412a/Traefik/blob/master/2.PNG)
+
+註 : 由於備份時因版本不同，所以我升級舊版gitlab v11 => v12 ，匯出備份後產生錯誤(升級前並未產生)，當下並未釐清錯誤原因，是否因此導還原錯誤還有待證實(2019.07.03)
