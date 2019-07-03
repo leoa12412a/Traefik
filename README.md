@@ -45,3 +45,7 @@ CONTAINER ID        IMAGE                      COMMAND                  CREATED 
 [root@122-147-213-61 traefik]# docker-compose up -d whoami
 Creating traefik_whoami_1 ... done
 ```
+
+```
+gitlab-rake gitlab:backup:create
+```
