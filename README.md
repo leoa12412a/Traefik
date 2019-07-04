@@ -279,6 +279,10 @@ gitlab-ctl stop sidekiq
 ```
 gitlab-ctl status
 ```
+須先把tar檔的歸屬者及群組git
+```
+chown git:git 1562137625_2019_07_03_11.10.4_gitlab_backup.tar 
+```
 還原備份以及重新建立資料庫
 ```
 gitlab-rake gitlab:backup:restore BACKUP=1493107454_2017_04_25_9.1.0
