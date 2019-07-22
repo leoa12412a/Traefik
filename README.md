@@ -79,8 +79,8 @@ version: '3'
 
 services:
   redis:
-    restart: always
-    image: redis
+    restart: always 
+    image: redis 
     command:
     - --loglevel warning
     volumes:
@@ -88,46 +88,47 @@ services:
 
   postgresql:
     restart: always
-    image: postgres
+    image: postgres 
     volumes:
     - /srv/docker/gitlab/postgresql:/var/lib/postgresql:Z
     environment:
-    - DB_USER=gitlab
-    - DB_PASS=password
-    - DB_NAME=gitlabhq_production
+    - DB_USER=YOURUSERNAME
+    - DB_PASS=YOURPASSWORD
+    - DB_NAME=YOURSQLNAME
     - DB_EXTENSION=pg_trgm
 
   gitlab:
     restart: always
-    image: gitlab/gitlab-ce:11.10.4-ce.0
+    image: gitlab/gitlab-ce:latest
+    hostname: gitlab.9skin.com
     depends_on:
-    - redis
+    - redis  
     - postgresql
-    ports:
+    ports: 
     - "10080:80"
     - "10022:22"
     volumes:
     - /srv/docker/gitlab/gitlab:/home/git/data:Z
     environment:
     - DEBUG=false
-
-    - DB_ADAPTER=postgresql
+    - GITLAB_OMNIBUS_CONFIG= external_url 'http://gitlab.9skin.com:10080'
+    - GITLAB_OMNIBUS_CONFIG= gitlab_rails['gitlab_shell_ssh_port'] = 10022
     - DB_HOST=postgresql
     - DB_PORT=5432
-    - DB_USER=gitlab
-    - DB_PASS=password
-    - DB_NAME=gitlabhq_production
+    - DB_USER=YOURUSERNAME
+    - DB_PASS=YOURPASSWORD
+    - DB_NAME=YOURSQLNAME
 
     - REDIS_HOST=redis
     - REDIS_PORT=6379
 
-    - TZ=Asia/Kolkata
-    - GITLAB_TIMEZONE=Kolkata
+    - TZ=Asia/Taipei
+    - GITLAB_TIMEZONE=Taipei
 
     - GITLAB_HTTPS=false
     - SSL_SELF_SIGNED=false
 
-    - GITLAB_HOST=localhost
+    - GITLAB_HOST=122.147.213.59
     - GITLAB_PORT=10080
     - GITLAB_SSH_PORT=10022
     - GITLAB_RELATIVE_URL_ROOT=
