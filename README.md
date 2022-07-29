@@ -96,6 +96,7 @@ services:
     - DB_PASS=YOURPASSWORD
     - DB_NAME=YOURSQLNAME
     - DB_EXTENSION=pg_trgm
+    - POSTGRES_HOST_AUTH_METHOD=trust
 
   gitlab:
     restart: always
