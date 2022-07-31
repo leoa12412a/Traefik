@@ -74,6 +74,18 @@ Creating traefik_whoami_1 ... done
 
 一樣我們先撰寫gitlab的docker-compose.yml，主要是安裝redis,postgres還有gitlab，如下:
 
+Server要開的Port如下
+```
+firewall-cmd --add-port=22/tcp --permanent
+firewall-cmd --add-port=80/tcp --permanent
+firewall-cmd --add-port=443/tcp --permanent
+firewall-cmd --add-port=8080/tcp --permanent
+firewall-cmd --add-port=10022/tcp --permanent
+firewall-cmd --add-port=10080/tcp --permanent
+firewall-cmd --reload
+firewall-cmd --zone=public --list-all
+```
+
 ```
 version: '3'
 
